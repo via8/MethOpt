@@ -24,12 +24,18 @@
     <ClCompile Include="source\TransportProblemTable.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="source\TransportProblemSolver.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\EigenHelper.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\TransportProblemTable.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\TransportProblemSolver.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

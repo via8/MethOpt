@@ -42,6 +42,13 @@ int main(int argc, char const* argv[]) {
 			throw EXCEPTION_FILE_OPEN;
 
 		TransportProblemTable table(input);
+		std::cout << table.getm() << '\n';
+		std::cout << table.getn() << '\n';
+		std::cout << table.geta().transpose() << '\n';
+		std::cout << table.getb().transpose() << '\n';
+		std::cout << table.getx() << '\n';
+		std::cout << table.getc() << '\n';
+
 	}
 	catch (char const* errMsg) {
 		std::cout << "ERROR: " << errMsg << '\n';

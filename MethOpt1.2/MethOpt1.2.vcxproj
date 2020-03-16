@@ -142,10 +142,12 @@
   <ItemGroup>
     <ClCompile Include="main.cpp" />
     <ClCompile Include="source\EigenHelper.cpp" />
+    <ClCompile Include="source\TransportProblemSolver.cpp" />
     <ClCompile Include="source\TransportProblemTable.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\EigenHelper.hpp" />
+    <ClInclude Include="include\TransportProblemSolver.hpp" />
     <ClInclude Include="include\TransportProblemTable.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

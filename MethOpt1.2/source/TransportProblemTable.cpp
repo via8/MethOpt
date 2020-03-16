@@ -43,8 +43,6 @@ TransportProblemTable::TransportProblemTable(std::ifstream& input) {
 	}
 
 	// fill container of banned routes
-	bans = PairsInt(0, 2);
-	Int bansNumber = 0;
 	while (!stream.eof()) {
 		Int from;
 		Int to;
@@ -54,10 +52,10 @@ TransportProblemTable::TransportProblemTable(std::ifstream& input) {
 			if (from < 0 || from >= m ||
 				to   < 0 || to   >= n)
 				throw EXCEPTION_INVALID_INPUT_DATA;
-			bans.conservativeResize(bansNumber + 1, 2);
-			bans(bansNumber, 0) = from;
-			bans(bansNumber, 1) = to;
-			++bansNumber;
+			c(from, to) = EigenHelper::InfinityFloat;
 		}
 	}
+
+	// TODO: check correctness of input data: sum(b_j) <= sum(a_i)
+	// TODO: implement auto-closing
 }

@@ -1,5 +1,5 @@
-#ifndef TRANSPORT_PROBLEM_TABLE
-#define TRANSPORT_PROBLEM_TABLE
+#ifndef TRANSPORT_PROBLEM_TABLE_HPP
+#define TRANSPORT_PROBLEM_TABLE_HPP
 
 #include <fstream>	// ifstream
 #include "EigenHelper.hpp"
@@ -18,8 +18,6 @@ private:
 	MatrixFloat x;	// matrix of variables x_ij
 	MatrixFloat c;	// matrix of tariffs   c_ij
 
-	PairsInt bans;	// container of pairs (warehouse number, delivery point) of banned routes
-
 public:
 	TransportProblemTable(std::ifstream& input);
 	Int getm() const { return m; }
@@ -28,7 +26,6 @@ public:
 	VectorFloat const& getb() const { return b; }
 	MatrixFloat const& getx() const { return x; }
 	MatrixFloat const& getc() const { return c; }
-	PairsInt const& getbans() const { return bans; }
 };
 
-#endif /* TRANSPORT_PROBLEM_TABLE */
+#endif /* TRANSPORT_PROBLEM_TABLE_HPP */

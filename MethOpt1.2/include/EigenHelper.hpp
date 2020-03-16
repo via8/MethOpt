@@ -1,12 +1,16 @@
-#ifndef EIGEN_HELPER_H
-#define EIGEN_HELPER_H
+#ifndef EIGEN_HELPER_HPP
+#define EIGEN_HELPER_HPP
 
 #include <Eigen/Dense>
 
-using Int = Eigen::Index;
+using Int		  = Eigen::Index;
 using VectorFloat = Eigen::VectorXf;
 using MatrixFloat = Eigen::MatrixXf;
-using PairsInt	  = Eigen::Matrix<Int, -1, 2>;
+//using PairsInt	  = Eigen::Matrix<Int, -1, 2>;
+
+//enum {
+//	NO_CHANGE = Eigen::NoChange
+//};
 
 class EigenHelper {
 private:
@@ -17,4 +21,4 @@ public:
 	static float const InfinityFloat;
 };
 
-#endif /* EIGEN_HELPER_H */
+#endif /* EIGEN_HELPER_HPP */
