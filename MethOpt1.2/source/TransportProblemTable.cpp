@@ -15,8 +15,8 @@ TransportProblemTable::TransportProblemTable(std::ifstream& input) {
 		throw EXCEPTION_INVALID_INPUT_DATA;
 
 	// read vector of available cargo and vector of required cargo
-	a = VectorFloat::Zero(m);
-	b = VectorFloat::Zero(n);
+	a = VectorInt::Zero(m);
+	b = VectorInt::Zero(n);
 	for (Int i = 0; i < m; ++i) {
 		if (!(stream >> a(i)))
 			throw EXCEPTION_UNEXPECTED_EOF;
@@ -31,8 +31,8 @@ TransportProblemTable::TransportProblemTable(std::ifstream& input) {
 	}
 
 	// build matrix of variables and read matrix of tariffs
-	x = MatrixFloat::Zero(m, n);
 	c = MatrixFloat::Zero(m, n);
+	x = MatrixInt::Zero(m, n);
 	for (Int i = 0; i < m; ++i) {
 		for (Int j = 0; j < n; ++j) {
 			if (!(stream >> c(i, j)))
@@ -52,7 +52,8 @@ TransportProblemTable::TransportProblemTable(std::ifstream& input) {
 			if (from < 0 || from >= m ||
 				to   < 0 || to   >= n)
 				throw EXCEPTION_INVALID_INPUT_DATA;
-			c(from, to) = EigenHelper::InfinityFloat;
+			c(from, to) = EigenHelper::InfinityInt;
+			//c(from, to) = EigenHelper::InfinityFloat;
 		}
 	}
 

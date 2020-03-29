@@ -1,6 +1,7 @@
 #include <iostream>	// cout
 #include <fstream>	// ifstream
 #include "TransportProblemTable.hpp"
+#include "TransportProblemSolver.hpp"
 
 int main(int argc, char const* argv[]) {
 	char const* EXCEPTION_CMD_LINE_ARGS = "Input data filename expected as a command line argument";
@@ -42,6 +43,10 @@ int main(int argc, char const* argv[]) {
 			throw EXCEPTION_FILE_OPEN;
 
 		TransportProblemTable table(input);
+
+		TransportProblemSolver solver;
+		solver.solve(table);
+
 		std::cout << table.getm() << '\n';
 		std::cout << table.getn() << '\n';
 		std::cout << table.geta().transpose() << '\n';

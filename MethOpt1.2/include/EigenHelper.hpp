@@ -4,7 +4,9 @@
 #include <Eigen/Dense>
 
 using Int		  = Eigen::Index;
-using VectorFloat = Eigen::VectorXf;
+using VectorInt   = Eigen::VectorXi;
+//using VectorFloat = Eigen::VectorXf;
+using MatrixInt	  = Eigen::MatrixXi;
 using MatrixFloat = Eigen::MatrixXf;
 //using PairsInt	  = Eigen::Matrix<Int, -1, 2>;
 
@@ -18,6 +20,7 @@ private:
 	~EigenHelper() = delete;
 
 public:
+	static Int const InfinityInt;
 	static float const InfinityFloat;
 };
 

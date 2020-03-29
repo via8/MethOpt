@@ -12,20 +12,20 @@ private:
 	Int m;	// number of warehouses
 	Int n;	// number of delivery points
 
-	VectorFloat a;	// vector of available cargo a_i, i = 0..m-1
-	VectorFloat b;	// vector of required  cargo b_j, j = 0..n-1
+	VectorInt a;	// vector of available cargo a_i, i = 0..m-1
+	VectorInt b;	// vector of required  cargo b_j, j = 0..n-1
 
-	MatrixFloat x;	// matrix of variables x_ij
 	MatrixFloat c;	// matrix of tariffs   c_ij
+	MatrixInt x;	// matrix of variables x_ij
 
 public:
 	TransportProblemTable(std::ifstream& input);
 	Int getm() const { return m; }
 	Int getn() const { return n; }
-	VectorFloat const& geta() const { return a; }
-	VectorFloat const& getb() const { return b; }
-	MatrixFloat const& getx() const { return x; }
+	VectorInt const& geta() const { return a; }
+	VectorInt const& getb() const { return b; }
 	MatrixFloat const& getc() const { return c; }
+	MatrixInt& getx() { return x; }
 };
 
 #endif /* TRANSPORT_PROBLEM_TABLE_HPP */

@@ -6,12 +6,14 @@
 
 class TransportProblemSolver {
 private:
+	static char const* EXCEPTION_NO_SOLUTION;
+
 	void northwestCornerMethod(TransportProblemTable& table) const;
 	void  minimumElementMethod(TransportProblemTable& table) const;
 
 public:
 	// enumeration of methods of building initial approximation
-	enum tag_init_approx {
+	enum class InitApprox {
 		NW_CORNER_METHOD = 0,
 		MIN_ELEM_METHOD  = 1
 	};
@@ -19,7 +21,7 @@ public:
 	 TransportProblemSolver();
 	~TransportProblemSolver();
 
-	VectorFloat solve(TransportProblemTable& table, tag_init_approx method = NW_CORNER_METHOD) const;
+	void solve(TransportProblemTable& table, InitApprox method = InitApprox::NW_CORNER_METHOD) const;
 };
 
 #endif /* TRANSPORT_PROBLEM_SOLVER_HPP */
