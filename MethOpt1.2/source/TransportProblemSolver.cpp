@@ -7,6 +7,8 @@ char const* TransportProblemSolver::EXCEPTION_NW_METHOD_NOT_APPLICABLE = "NW met
 char const* TransportProblemSolver::EXCEPTION_MATRIX_RANK = "Tariffs matrix rank is inappropriate";
 char const* TransportProblemSolver::EXCEPTION_MEMORY_LACK = "Unable allocate memory for calculations";
 char const* TransportProblemSolver::EXCEPTION_RECALCULATION_CYCLE = "Unknown error, unable to build recalculation cycle";
+float const TransportProblemSolver::EPSILON = 1E-6f;
+
 
 TransportProblemSolver::TransportProblemSolver() {}
 
@@ -22,9 +24,9 @@ void TransportProblemSolver::solve(TransportProblemTable& table, InitApprox meth
 	case InitApprox::NW_CORNER_METHOD:
 		northwestCornerMethod(table);
 		break;
-	case InitApprox::MIN_ELEM_METHOD:
-		minimumElementMethod(table);
-		break;
+	//case InitApprox::MIN_ELEM_METHOD:
+	//	minimumElementMethod(table);
+	//	break;
 	default:
 		break;
 	}
@@ -35,24 +37,23 @@ void TransportProblemSolver::solve(TransportProblemTable& table, InitApprox meth
 void TransportProblemSolver::northwestCornerMethod(TransportProblemTable& table) const {
 	Int m = table.getm();
 	Int n = table.getn();
-	VectorInt a = table.geta();
-	VectorInt b = table.getb();
+	VectorFloat a = table.geta();
+	VectorFloat b = table.getb();
 
 	for (Int i = 0, j = 0; i != m || j != n;) {
 
 		if (table.getc()(i, j) == EigenHelper::InfinityFloat)
 			throw EXCEPTION_NW_METHOD_NOT_APPLICABLE;
 
-		Int min = a(i) < b(j) ? a(i) : b(j);
+		float min = a(i) < b(j) ? a(i) : b(j);
 		table.getx()(i, j) = min;
 
 		a(i) -= min;
 		b(j) -= min;
 
-		if (a(i) == 0)
+		if (a(i) < EPSILON)
 			++i;
-
-		if (b(j) == 0)
+		if (b(j) < EPSILON)
 			++j;
 	}
 }
@@ -60,17 +61,17 @@ void TransportProblemSolver::northwestCornerMethod(TransportProblemTable& table)
 void TransportProblemSolver::minimumElementMethod(TransportProblemTable& table) const {
 	Int m = table.getm();
 	Int n = table.getn();
-	VectorInt a = table.geta();
-	VectorInt b = table.getb();
+	VectorFloat a = table.geta();
+	VectorFloat b = table.getb();
 
 	// simple ~(mn)(m + n) implementation
 	// though we will not need to use
 	// NW-method on cells with same tariffs
 	// cause of minI and minJ already fit
-	Int required = 0;
+	float required = 0;
 	for (Int j = 0; j < n; ++j)
 		required += table.getb()(j);
-	while (required > 0) {
+	while (required > EPSILON) {
 		float minTariff = EigenHelper::InfinityFloat;
 		Int minI;
 		Int minJ;
@@ -89,7 +90,7 @@ void TransportProblemSolver::minimumElementMethod(TransportProblemTable& table) 
 		}
 		if (minTariff == EigenHelper::InfinityFloat)
 			throw EXCEPTION_NO_SOLUTION;
-		Int min = a(minI) < b(minJ) ? a(minI) : b(minJ);
+		float min = a(minI) < b(minJ) ? a(minI) : b(minJ);
 		table.getx()(minI, minJ) = min;
 		a(minI) -= min;
 		b(minJ) -= min;
@@ -101,8 +102,8 @@ void TransportProblemSolver::minimumElementMethod(TransportProblemTable& table) 
 void TransportProblemSolver::potentialsMethod(TransportProblemTable& table) const {
 	Int m = table.getm();
 	Int n = table.getn();
-	VectorFloat u = VectorFloat(m);				// u_i, i from 0..m-1 potentials
-	VectorFloat v = VectorFloat(n);				// v_j, j from 0..n-1 potentials
+	VectorFloat u(m);							// u_i, i from 0..m-1 potentials
+	VectorFloat v(n);							// v_j, j from 0..n-1 potentials
 	std::vector<std::pair<Int, Int>> filled;	// routes (cells - pairs of i, j) assigned with cargo
 	
 	bool optimal = false;
@@ -129,14 +130,12 @@ void TransportProblemSolver::potentialsMethod(TransportProblemTable& table) cons
 		Int col;
 		if (!(optimal = isOptimal(table.getx(), table.getc(), u, v, row, col))) {
 			// if not optimal then build and run recalculation cycle
-			std::cout << "\nbefore\n" << table.getx() << "\n\n";
-			runRecalculationCycle(table.getx(), row, col);
-			std::cout << "\nafter\n" << table.getx() << "\n\n";
+			runRecalculationCycle(table, row, col);
 		}
 	}
 }
 
-// TODO: optimize
+// TODO: optimize & debug
 void TransportProblemSolver::calculatePotentials(MatrixFloat const& c, std::vector<std::pair<Int, Int>> const& filled, VectorFloat& u, VectorFloat& v) const {
 	Int m = c.rows();
 	Int n = c.cols();
@@ -183,11 +182,11 @@ void TransportProblemSolver::calculatePotentials(MatrixFloat const& c, std::vect
 	}
 }
 
-bool TransportProblemSolver::isOptimal(MatrixInt const& x, MatrixFloat const& c, VectorFloat const& u, VectorFloat const& v, Int& row, Int& col) const {
+bool TransportProblemSolver::isOptimal(MatrixFloat const& x, MatrixFloat const& c, VectorFloat const& u, VectorFloat const& v, Int& row, Int& col) const {
 	for (row = 0; row < x.rows(); ++row) {
 		for (col = 0; col < x.cols(); ++col) {
 			// if cell is empty (filled does not contain it) and optimality condition is violated
-			if (x(row, col) == 0 && v(col) - u(row) > c(row, col)) {
+			if (x(row, col) < EPSILON && v(col) - u(row) > c(row, col)) {
 				return false;
 			}
 		}
@@ -196,25 +195,27 @@ bool TransportProblemSolver::isOptimal(MatrixInt const& x, MatrixFloat const& c,
 	return true;
 }
 
-void TransportProblemSolver::runRecalculationCycle(MatrixInt& x, Int row, Int col) const {
+void TransportProblemSolver::runRecalculationCycle(TransportProblemTable& table, Int row, Int col) const {
 	std::pair<Int, Int> initial = std::pair<Int, Int>(row, col);
+	MatrixFloat& x = table.getx();
+	MatrixFloat const& c = table.getc();
 
 	// build recalculation cycle
-	Pathfinder pathfinder(x, initial);
-	if (!pathfinder.recursivePathSearch(initial, Pathfinder::VERTICAL, Pathfinder::PLUS))
+	Pathfinder pathfinder(x, c, initial);
+	if (!pathfinder.recursivePathSearch(initial, Pathfinder::VERTICAL))
 		throw EXCEPTION_RECALCULATION_CYCLE;
 
 	// find minimum value among all cells in path with MINUS sign 
 	std::vector<std::pair<Int, Int>> path = pathfinder.getPath();
-	Int min = EigenHelper::InfinityInt;
+	float min = EigenHelper::InfinityFloat;
 	// even => PLUS, odd => MINUS
-	for (Int i = 1; i < path.size(); i += 2) {
+	for (Int i = 1; i < (Int)path.size(); i += 2) {
 		if (min > x(path[i].first, path[i].second))
 			min = x(path[i].first, path[i].second);
 	}
 	
 	// recalculate values in path's cells (PLUS => + min, MINUS => - min)
-	for (Int i = 0; i < path.size(); ++i) {
+	for (Int i = 0; i < (Int)path.size(); ++i) {
 		if (i % 2)
 			x(path[i].first, path[i].second) -= min;
 		else
@@ -222,8 +223,8 @@ void TransportProblemSolver::runRecalculationCycle(MatrixInt& x, Int row, Int co
 	}
 }
 
-TransportProblemSolver::Pathfinder::Pathfinder(MatrixInt const& x, std::pair<Int, Int> initial)
-	: x(x), m(x.rows()), n(x.cols()), initial(initial) {
+TransportProblemSolver::Pathfinder::Pathfinder(MatrixFloat const& x, MatrixFloat const& c, std::pair<Int, Int> initial)
+	: x(x), c(c), m(x.rows()), n(x.cols()), initial(initial) {
 	hPathsPaved = std::vector<bool>(x.rows(), false);
 	vPathsPaved = std::vector<bool>(x.cols(), false);
 }
@@ -231,21 +232,31 @@ TransportProblemSolver::Pathfinder::Pathfinder(MatrixInt const& x, std::pair<Int
 TransportProblemSolver::Pathfinder::~Pathfinder() {}
 
 // TODO: remove recursion & optimize
-bool TransportProblemSolver::Pathfinder::recursivePathSearch(std::pair<Int, Int> cursor, Int prevDir, Int prevSign) {
+bool TransportProblemSolver::Pathfinder::recursivePathSearch(std::pair<Int, Int> cursor, Int prevDir) {
 	assert(path.size() < (size_t)(m + n));
 	path.push_back(cursor);
-	//std::cout << cursor.first << ' ' << cursor.second << '\n';
 
 	if (prevDir == HORIZONTAL) {
 		hPathsPaved[cursor.first] = true;
 		for (Int i = 0; i < m; ++i) {
-			if (cursor != initial && i == initial.first && cursor.second == initial.second)
-				// TODO: ONLY IF CYCLE COST < 0 => RETURN TRUE, ELSE RETURN FALSE
-				return true;
-			if (hPathsPaved[i] || (prevSign == PLUS && x(i, cursor.second) == 0))
+			if (cursor != initial && i == initial.first && cursor.second == initial.second) {
+				// TODO: figure out if this check is necessary:
+				// only if cycle cost < 0 => return true, else return false
+				float cycleCost = 0;
+				for (Int i = 0; i < (Int)path.size(); ++i) {
+					if (i % 2 == 0)
+						cycleCost += c(path[i].first, path[i].second);	// even => +
+					else
+						cycleCost -= c(path[i].first, path[i].second);	// odd  => -
+				}
+				if (cycleCost < 0.0f)
+					return true;
+				else
+					return false;
+			}
+			if (hPathsPaved[i] || x(i, cursor.second) < EPSILON)
 				continue;
-			//if ((i == initial.first && cursor.second == initial.second) || //std::pair<Int, Int>(i, cursor.second) == initial ||
-			if	(recursivePathSearch(std::pair<Int, Int>(i, cursor.second), VERTICAL, prevSign == PLUS ? MINUS : PLUS))
+			if	(recursivePathSearch(std::pair<Int, Int>(i, cursor.second), VERTICAL))
 				return true;
 		}
 		hPathsPaved[cursor.first] = false;
@@ -253,16 +264,12 @@ bool TransportProblemSolver::Pathfinder::recursivePathSearch(std::pair<Int, Int>
 	else {
 		vPathsPaved[cursor.second] = true;
 		for (Int j = 0; j < n; ++j) {
-			// THERE'S NO WAY WE CAN RETURN HORIZONTALLY
-			//if (cursor != initial && j == initial.second && cursor.first == initial.first)
-			//	return true;
-
-			// we start moving horizontally => we have to return in initial cell vertically
+			// there's no way we can return horizontally because we started moving horizontally
+			// => we have to return in initial cell vertically
 			// => vPathsPaved[initial.second] may be 'true'
-			if ((vPathsPaved[j] && j != initial.second) || (prevSign == PLUS && x(cursor.first, j) == 0))
+			if ((vPathsPaved[j] && j != initial.second) || x(cursor.first, j) < EPSILON)
 				continue;
-			//if ((j == initial.second && cursor.first == initial.first) || //std::pair<Int, Int>(cursor.first, j) == initial ||
-			if	(recursivePathSearch(std::pair<Int, Int>(cursor.first, j), HORIZONTAL, prevSign == PLUS ? MINUS : PLUS))
+			if	(recursivePathSearch(std::pair<Int, Int>(cursor.first, j), HORIZONTAL))
 				return true;
 		}
 		vPathsPaved[cursor.second] = false;

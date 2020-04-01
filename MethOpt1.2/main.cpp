@@ -47,13 +47,15 @@ int main(int argc, char const* argv[]) {
 		TransportProblemSolver solver;
 		solver.solve(table);
 
-		std::cout << table.getm() << '\n';
-		std::cout << table.getn() << '\n';
-		std::cout << table.geta().transpose() << '\n';
-		std::cout << table.getb().transpose() << '\n';
-		std::cout << table.getx() << '\n';
-		std::cout << table.getc() << '\n';
+		std::cout << "result matrix:\n" << table.getx() << '\n';
+		float sum = 0;
+		for (Int i = 0; i < table.getm(); ++i) {
+			for (Int j = 0; j < table.getn(); ++j)
+				if (table.getx()(i, j) > 1e-6f)
+					sum += table.getx()(i, j) * table.getc()(i, j);
+		}
 
+		std::cout << "cost: " << sum << '\n';
 	}
 	catch (char const* errMsg) {
 		std::cout << "ERROR: " << errMsg << '\n';

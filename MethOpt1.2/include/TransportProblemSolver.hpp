@@ -13,18 +13,20 @@ private:
 	static char const* EXCEPTION_MATRIX_RANK;				// TODO: this one is not an exception actually, resolvable
 	static char const* EXCEPTION_MEMORY_LACK;
 	static char const* EXCEPTION_RECALCULATION_CYCLE;
+	static float const EPSILON;
 
 	void northwestCornerMethod(TransportProblemTable& table) const;
 	void  minimumElementMethod(TransportProblemTable& table) const;
 	void potentialsMethod(TransportProblemTable& table) const;
 
 	void calculatePotentials(MatrixFloat const& c, std::vector<std::pair<Int, Int>> const& filled, VectorFloat& u, VectorFloat& v) const;
-	bool isOptimal(MatrixInt const& x, MatrixFloat const& c, VectorFloat const& u, VectorFloat const& v, Int& row, Int& col) const;
-	void runRecalculationCycle(MatrixInt& x, Int row, Int col) const;
+	bool isOptimal(MatrixFloat const& x, MatrixFloat const& c, VectorFloat const& u, VectorFloat const& v, Int& row, Int& col) const;
+	void runRecalculationCycle(TransportProblemTable& table, Int row, Int col) const;
 	
 	class Pathfinder {
 	private:
-		MatrixInt const& x;
+		MatrixFloat const& x;
+		MatrixFloat const& c;
 		Int const m;
 		Int const n;
 		std::pair<Int, Int> initial;
@@ -38,23 +40,18 @@ private:
 			HORIZONTAL
 		};
 
-		enum {
-			PLUS = 0,
-			MINUS
-		};
-
-		Pathfinder(MatrixInt const& x, std::pair<Int, Int> initial);
+		Pathfinder(MatrixFloat const& x, MatrixFloat const& c, std::pair<Int, Int> initial);
 		~Pathfinder();
 
-		bool recursivePathSearch(std::pair<Int, Int> cursor, Int prevDir, Int prevSign);
+		bool recursivePathSearch(std::pair<Int, Int> cursor, Int prevDir);
 		std::vector<std::pair<Int, Int>> getPath() { return path; }
 	};
 
 public:
 	// enumeration of methods of building initial approximation
 	enum class InitApprox {
-		NW_CORNER_METHOD = 0,
-		MIN_ELEM_METHOD  = 1
+		NW_CORNER_METHOD = 0
+		//MIN_ELEM_METHOD  = 1
 	};
 
 	 TransportProblemSolver();
