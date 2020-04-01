@@ -1,6 +1,8 @@
 #include "TransportProblemSolver.hpp"
 #include <assert.h>	// assert
-#include <iostream>
+#include <iostream>	// cout
+
+#define MO_1_2_DEBUG
 
 char const* TransportProblemSolver::EXCEPTION_NO_SOLUTION = "No solution can be found";
 char const* TransportProblemSolver::EXCEPTION_NW_METHOD_NOT_APPLICABLE = "NW method of calculating initial solution is not applicable for specified problem";
@@ -8,7 +10,6 @@ char const* TransportProblemSolver::EXCEPTION_MATRIX_RANK = "Tariffs matrix rank
 char const* TransportProblemSolver::EXCEPTION_MEMORY_LACK = "Unable allocate memory for calculations";
 char const* TransportProblemSolver::EXCEPTION_RECALCULATION_CYCLE = "Unknown error, unable to build recalculation cycle";
 float const TransportProblemSolver::EPSILON = 1E-6f;
-
 
 TransportProblemSolver::TransportProblemSolver() {}
 
@@ -30,6 +31,10 @@ void TransportProblemSolver::solve(TransportProblemTable& table, InitApprox meth
 	default:
 		break;
 	}
+
+#ifdef MO_1_2_DEBUG
+	std::cout << "initial solution:\n" << table.getx() << '\n' << '\n';
+#endif /* MO_1_2_DEBUG */
 
 	potentialsMethod(table);
 }
@@ -106,6 +111,10 @@ void TransportProblemSolver::potentialsMethod(TransportProblemTable& table) cons
 	VectorFloat v(n);							// v_j, j from 0..n-1 potentials
 	std::vector<std::pair<Int, Int>> filled;	// routes (cells - pairs of i, j) assigned with cargo
 	
+#ifdef MO_1_2_DEBUG
+	size_t iterations = 0;
+#endif /* MO_1_2_DEBUG */
+
 	bool optimal = false;
 	while (!optimal) {
 		u.setConstant(EigenHelper::NanFloat);
@@ -131,11 +140,14 @@ void TransportProblemSolver::potentialsMethod(TransportProblemTable& table) cons
 		if (!(optimal = isOptimal(table.getx(), table.getc(), u, v, row, col))) {
 			// if not optimal then build and run recalculation cycle
 			runRecalculationCycle(table, row, col);
+#ifdef MO_1_2_DEBUG
+			std::cout << ++iterations << " iteration:\n" << table.getx() << '\n' << '\n';
+#endif /* MO_1_2_DEBUG */
 		}
 	}
 }
 
-// TODO: optimize & debug
+// TODO: optimize & debug (minimum element method prohibited)
 void TransportProblemSolver::calculatePotentials(MatrixFloat const& c, std::vector<std::pair<Int, Int>> const& filled, VectorFloat& u, VectorFloat& v) const {
 	Int m = c.rows();
 	Int n = c.cols();

@@ -1,5 +1,6 @@
 #include <iostream>	// cout
 #include <fstream>	// ifstream
+#include <iomanip>	// fixed, setprecision
 #include "TransportProblemTable.hpp"
 #include "TransportProblemSolver.hpp"
 
@@ -43,11 +44,13 @@ int main(int argc, char const* argv[]) {
 			throw EXCEPTION_FILE_OPEN;
 
 		TransportProblemTable table(input);
-
 		TransportProblemSolver solver;
+
+		std::cout << std::fixed << std::setprecision(3);
 		solver.solve(table);
 
-		std::cout << "result matrix:\n" << table.getx() << '\n';
+		//std::cout << "result matrix:\n" << table.getx() << '\n' << '\n';
+
 		float sum = 0;
 		for (Int i = 0; i < table.getm(); ++i) {
 			for (Int j = 0; j < table.getn(); ++j)
@@ -55,7 +58,7 @@ int main(int argc, char const* argv[]) {
 					sum += table.getx()(i, j) * table.getc()(i, j);
 		}
 
-		std::cout << "cost: " << sum << '\n';
+		std::cout << "plan cost:\n" << sum << '\n';
 	}
 	catch (char const* errMsg) {
 		std::cout << "ERROR: " << errMsg << '\n';
