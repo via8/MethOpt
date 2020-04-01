@@ -5,10 +5,10 @@
 
 using Int		  = Eigen::Index;
 using VectorInt   = Eigen::VectorXi;
-//using VectorFloat = Eigen::VectorXf;
+using VectorFloat = Eigen::VectorXf;
 using MatrixInt	  = Eigen::MatrixXi;
 using MatrixFloat = Eigen::MatrixXf;
-//using PairsInt	  = Eigen::Matrix<Int, -1, 2>;
+//using PairsInt   = Eigen::Matrix<Int, -1, 2>;
 
 //enum {
 //	NO_CHANGE = Eigen::NoChange
@@ -22,6 +22,10 @@ private:
 public:
 	static Int const InfinityInt;
 	static float const InfinityFloat;
+	static float const NanFloat;
+	static bool isNan(float value);
+	static Int matrixFloatRank(MatrixFloat const& matrix);
+	//static VectorFloat solveLinearProblem(MatrixFloat)
 };
 
 #endif /* EIGEN_HELPER_HPP */

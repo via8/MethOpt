@@ -52,8 +52,8 @@ TransportProblemTable::TransportProblemTable(std::ifstream& input) {
 			if (from < 0 || from >= m ||
 				to   < 0 || to   >= n)
 				throw EXCEPTION_INVALID_INPUT_DATA;
-			c(from, to) = EigenHelper::InfinityInt;
-			//c(from, to) = EigenHelper::InfinityFloat;
+			//c(from, to) = EigenHelper::InfinityInt;
+			c(from, to) = EigenHelper::InfinityFloat;
 		}
 	}
 
