@@ -6,10 +6,6 @@
 	#define MO_1_2_DEBUG
 #endif
 
-#ifdef MO_1_2_DEBUG
-	#include <algorithm>
-#endif
-
 char const* TransportProblemSolver::EXCEPTION_NO_SOLUTION = "No solution can be found";
 char const* TransportProblemSolver::EXCEPTION_NW_METHOD_NOT_APPLICABLE = "NW method of calculating initial solution is not applicable for specified problem";
 char const* TransportProblemSolver::EXCEPTION_MATRIX_RANK = "Tariffs matrix rank is inappropriate";
@@ -217,6 +213,7 @@ void TransportProblemSolver::runRecalculationCycle(TransportProblemTable& table,
 
 	// build recalculation cycle
 	Pathfinder pathfinder(x, c, initial);
+
 	if (!pathfinder.recursivePathSearch(initial, Pathfinder::VERTICAL))
 		throw EXCEPTION_RECALCULATION_CYCLE;
 
@@ -309,52 +306,38 @@ TransportProblemSolver::Pathfinder::Pathfinder(MatrixFloat const& x, MatrixFloat
 
 TransportProblemSolver::Pathfinder::~Pathfinder() {}
 
-// TODO: remove recursion & optimize
+// TODO: remove recursion
 bool TransportProblemSolver::Pathfinder::recursivePathSearch(std::pair<Int, Int> cursor, Int prevDir) {
-	assert(path.size() < (size_t)(m + n));
-	// TODO: find out where the hell this bug comes from
-	if (path.empty() || path.back() != cursor)
-		path.push_back(cursor);
-
+	path.push_back(cursor);
 	if (prevDir == HORIZONTAL) {
+		// return to the initial cell vertically
+		// there's no way we can return horizontally
+		// because we started moving horizontally
+		if (cursor.second == initial.second) {
+			return true;
+		}
 		hPathsPaved[cursor.first] = true;
 		for (Int i = 0; i < m; ++i) {
-			if (cursor != initial && i == initial.first && cursor.second == initial.second) {
-				// TODO: figure out if this check is necessary:
-				// only if cycle cost < 0 => return true, else return false
-				float cycleCost = 0;
-				for (Int i = 0; i < (Int)path.size(); ++i) {
-					if (i % 2 == 0)
-						cycleCost += c(path[i].first, path[i].second);	// even => +
-					else
-						cycleCost -= c(path[i].first, path[i].second);	// odd  => -
-				}
-				if (cycleCost < 0.0f)
-					return true;
-				else
-					return false;
-			}
 			if (hPathsPaved[i] || x(i, cursor.second) < EPSILON)
 				continue;
+
 			if	(recursivePathSearch(std::pair<Int, Int>(i, cursor.second), VERTICAL))
 				return true;
 		}
 		hPathsPaved[cursor.first] = false;
 	}
-	else {
-		vPathsPaved[cursor.second] = true;
+	if (prevDir == VERTICAL) {
+		if (cursor != initial)
+			vPathsPaved[cursor.second] = true;
 		for (Int j = 0; j < n; ++j) {
-			// there's no way we can return horizontally because we started moving horizontally
-			// => we have to return in initial cell vertically
-			// => vPathsPaved[initial.second] may be 'true'
-			if ((vPathsPaved[j] && j != initial.second) || x(cursor.first, j) < EPSILON)
+			if (vPathsPaved[j] || x(cursor.first, j) < EPSILON)
 				continue;
+
 			if	(recursivePathSearch(std::pair<Int, Int>(cursor.first, j), HORIZONTAL))
 				return true;
 		}
 		vPathsPaved[cursor.second] = false;
 	}
-
 	path.pop_back();
 	return false;
 }
