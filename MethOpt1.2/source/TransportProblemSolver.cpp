@@ -2,7 +2,13 @@
 #include <assert.h>	// assert
 #include <iostream>	// cout
 
-#define MO_1_2_DEBUG
+#ifndef NDEBUG
+	#define MO_1_2_DEBUG
+#endif
+
+#ifdef MO_1_2_DEBUG
+	#include <algorithm>
+#endif
 
 char const* TransportProblemSolver::EXCEPTION_NO_SOLUTION = "No solution can be found";
 char const* TransportProblemSolver::EXCEPTION_NW_METHOD_NOT_APPLICABLE = "NW method of calculating initial solution is not applicable for specified problem";
@@ -110,10 +116,6 @@ void TransportProblemSolver::potentialsMethod(TransportProblemTable& table) cons
 	VectorFloat u(m);							// u_i, i from 0..m-1 potentials
 	VectorFloat v(n);							// v_j, j from 0..n-1 potentials
 	std::vector<std::pair<Int, Int>> filled;	// routes (cells - pairs of i, j) assigned with cargo
-	
-#ifdef MO_1_2_DEBUG
-	size_t iterations = 0;
-#endif /* MO_1_2_DEBUG */
 
 	bool optimal = false;
 	while (!optimal) {
@@ -140,9 +142,6 @@ void TransportProblemSolver::potentialsMethod(TransportProblemTable& table) cons
 		if (!(optimal = isOptimal(table.getx(), table.getc(), u, v, row, col))) {
 			// if not optimal then build and run recalculation cycle
 			runRecalculationCycle(table, row, col);
-#ifdef MO_1_2_DEBUG
-			std::cout << ++iterations << " iteration:\n" << table.getx() << '\n' << '\n';
-#endif /* MO_1_2_DEBUG */
 		}
 	}
 }
@@ -208,6 +207,10 @@ bool TransportProblemSolver::isOptimal(MatrixFloat const& x, MatrixFloat const& 
 }
 
 void TransportProblemSolver::runRecalculationCycle(TransportProblemTable& table, Int row, Int col) const {
+#ifdef MO_1_2_DEBUG
+	static size_t iterations = 0;
+#endif /* MO_1_2_DEBUG */
+
 	std::pair<Int, Int> initial = std::pair<Int, Int>(row, col);
 	MatrixFloat& x = table.getx();
 	MatrixFloat const& c = table.getc();
@@ -233,6 +236,69 @@ void TransportProblemSolver::runRecalculationCycle(TransportProblemTable& table,
 		else
 			x(path[i].first, path[i].second) += min;
 	}
+
+#ifdef MO_1_2_DEBUG
+	enum {
+		MO_1_2_DEBUG_CYCLE_NONE = 0,
+		MO_1_2_DEBUG_CYCLE_START,
+		MO_1_2_DEBUG_CYCLE_PLUS,
+		MO_1_2_DEBUG_CYCLE_MINUS,
+		MO_1_2_DEBUG_CYCLE_PATH
+	};
+
+	MatrixInt scheme(table.getm(), table.getn());
+	scheme.setConstant(MO_1_2_DEBUG_CYCLE_NONE);
+
+	path.push_back(path[0]);
+	for (Int i = 0; i < (Int)path.size() - 1; ++i) {
+		if (i % 2)
+			scheme(path[i].first, path[i].second) = MO_1_2_DEBUG_CYCLE_MINUS;
+		else
+			scheme(path[i].first, path[i].second) = MO_1_2_DEBUG_CYCLE_PLUS;
+
+		std::pair<Int, Int> next = path[i + 1];
+		assert(path[i].first == next.first || path[i].second == next.second);
+
+		if (path[i].first == next.first) {
+			Int inc = (next.second - path[i].second > 0) ? 1 : -1;
+			for (Int curr = path[i].second + inc; curr != next.second; curr += inc)
+				scheme(next.first, curr) = MO_1_2_DEBUG_CYCLE_PATH;
+		}
+		else {
+			Int inc = (next.first - path[i].first > 0) ? 1 : -1;
+			for (Int curr = path[i].first + inc; curr != next.first; curr += inc)
+				scheme(curr, next.second) = MO_1_2_DEBUG_CYCLE_PATH;
+		}
+	}
+
+	scheme(row, col) = MO_1_2_DEBUG_CYCLE_START;
+	std::cout << ++iterations << " iteration:\nrecalculation cycle scheme:\n";
+	for (Int i = 0; i < scheme.rows(); ++i) {
+		for (Int j = 0; j < scheme.cols(); ++j) {
+			switch (scheme(i, j)) {
+			case MO_1_2_DEBUG_CYCLE_NONE:
+				std::cout << " 0 ";
+				break;
+			case MO_1_2_DEBUG_CYCLE_START:
+				std::cout << "[S]";
+				break;
+			case MO_1_2_DEBUG_CYCLE_PLUS:
+				std::cout << "[+]";
+				break;
+			case MO_1_2_DEBUG_CYCLE_MINUS:
+				std::cout << "[-]";
+				break;
+			case MO_1_2_DEBUG_CYCLE_PATH:
+				std::cout << " * ";
+				break;
+			default:
+				assert(true);
+			}
+		}
+		std::cout << "\n\n";
+	}
+	std::cout << "after cycle table:\n" << table.getx() << "\n\n\n";
+#endif /* MO_1_2_DEBUG */
 }
 
 TransportProblemSolver::Pathfinder::Pathfinder(MatrixFloat const& x, MatrixFloat const& c, std::pair<Int, Int> initial)
@@ -246,7 +312,9 @@ TransportProblemSolver::Pathfinder::~Pathfinder() {}
 // TODO: remove recursion & optimize
 bool TransportProblemSolver::Pathfinder::recursivePathSearch(std::pair<Int, Int> cursor, Int prevDir) {
 	assert(path.size() < (size_t)(m + n));
-	path.push_back(cursor);
+	// TODO: find out where the hell this bug comes from
+	if (path.empty() || path.back() != cursor)
+		path.push_back(cursor);
 
 	if (prevDir == HORIZONTAL) {
 		hPathsPaved[cursor.first] = true;
