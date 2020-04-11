@@ -87,7 +87,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>/include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -139,7 +139,19 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="source\Function.cpp" />
+    <ClCompile Include="source\InputData.cpp" />
     <ClCompile Include="source\main.cpp" />
+    <ClCompile Include="source\Solver.cpp" />
+    <ClCompile Include="source\SolverDichotomy.cpp" />
+    <ClCompile Include="source\SolverFibonacci.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="include\Function.h" />
+    <ClInclude Include="include\InputData.h" />
+    <ClInclude Include="include\Solver.h" />
+    <ClInclude Include="include\SolverDichotomy.h" />
+    <ClInclude Include="include\SolverFibonacci.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
