@@ -50,7 +50,5 @@ VectorDouble GradientMethod1stOrder::solve(
 	delete solverFibonacci;
 	delete inputData;
 
-	
-
 	return currPoint;
 }

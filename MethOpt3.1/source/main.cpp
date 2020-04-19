@@ -50,6 +50,8 @@ int main(int argc, char const* argv[]) {
 		VectorDouble ans = method1->solve(function, gradfunction, initialPoint, 1e-3);
 		std::cout << ans.transpose() << '\n';
 		std::cout << function.getCallCount() << '\n';
+
+		system("python ../plot/plot.py");
 	}
 	catch (char const* errMsg) {
 		std::cout << "ERROR: " << errMsg << '\n';
