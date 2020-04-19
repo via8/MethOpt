@@ -15,6 +15,7 @@ private:
 
 public:
 	InputData(std::ifstream& input);
+	InputData(double a, double b, double epsilon);
 	double geta() const { return m_a; }
 	double getb() const { return m_b; }
 	double getEpsilon() const { return m_epsilon; }

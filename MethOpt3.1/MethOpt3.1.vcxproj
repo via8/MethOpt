@@ -88,7 +88,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>include;../../../../../CPPLibs;../MethOpt2.1/source;../MethOpt2.1/include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -140,9 +140,17 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="source\EigenHelper.cpp" />
+    <ClCompile Include="source\GradientMethod.cpp" />
+    <ClCompile Include="source\GradientMethod1stOrder.cpp" />
     <ClCompile Include="source\main.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="include\EigenHelper.hpp" />
+    <ClInclude Include="include\GradientMethod.hpp" />
+    <ClInclude Include="include\GradientMethod1stOrder.hpp" />
+    <ClInclude Include="include\GradientMethod2ndOrder.hpp" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
-  <ImportGroup Label="ExtensionTargets">
-  </ImportGroup>
+  <ImportGroup Label="ExtensionTargets" />
 </Project>

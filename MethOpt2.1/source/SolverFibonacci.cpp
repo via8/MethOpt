@@ -25,7 +25,7 @@ SolverFibonacci::~SolverFibonacci() {
 	delete[] m_fib;
 }
 
-double SolverFibonacci::solve(Function& function, InputData const& data) const {
+double SolverFibonacci::solve(Function<double, double>& function, InputData const& data) const {
 	double a_k = data.geta();
 	double b_k = data.getb();
 	double eps = data.getEpsilon();

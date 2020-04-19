@@ -8,7 +8,7 @@ private:
 public:
 	SolverDichotomy() {}
 	~SolverDichotomy() {}
-	double solve(Function& function, InputData const& data) const;
+	double solve(Function<double, double>& function, InputData const& data) const;
 };
 
 #endif /* SOLVER_DICHOTOMY_H */

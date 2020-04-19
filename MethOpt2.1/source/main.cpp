@@ -39,7 +39,7 @@ int main(int argc, char const* argv[]) {
 
 		// Dichotomy method
 		InputData data(input);
-		Function function(f);
+		Function<double, double> function(f);
 		Solver* solver = new SolverDichotomy();
 		double ansDichotomy = solver->solve(function, data);
 		std::cout << std::fixed << std::setprecision(4);
@@ -53,6 +53,7 @@ int main(int argc, char const* argv[]) {
 		double ansFibonacci = solver->solve(function, data);
 		std::cout << "answer Fibonacci: " << ansFibonacci << '\n';
 		std::cout << "calls  Fibonacci: " << function.getCallCount() << '\n';
+		delete solver;
 	}
 	catch (char const* errMsg) {
 		std::cout << "ERROR: " << errMsg << '\n';

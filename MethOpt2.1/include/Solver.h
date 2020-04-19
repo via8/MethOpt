@@ -8,7 +8,7 @@ class Solver {
 public:
 	Solver() {}
 	virtual ~Solver() {}
-	virtual double solve(Function& function, InputData const& data) const = 0;
+	virtual double solve(Function<double, double>& function, InputData const& data) const = 0;
 };
 
 #endif /* SOLVER_H */

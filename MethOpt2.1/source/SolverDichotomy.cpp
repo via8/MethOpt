@@ -1,6 +1,6 @@
 #include "SolverDichotomy.h"
 
-double SolverDichotomy::solve(Function& function, InputData const& data) const {
+double SolverDichotomy::solve(Function<double, double>& function, InputData const& data) const {
 	double a_k = data.geta();
 	double b_k = data.getb();
 	double eps = data.getEpsilon();
