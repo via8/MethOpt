@@ -42,14 +42,14 @@ int main(int argc, char const* argv[]) {
 		Function function(f);
 		Solver* solver = new SolverDichotomy();
 		double ansDichotomy = solver->solve(function, data);
-		std::cout << std::fixed << std::setprecision(16);
+		std::cout << std::fixed << std::setprecision(4);
 		std::cout << "answer Dichotomy: " << ansDichotomy << '\n';
 		std::cout << "calls  Dichotomy: " << function.getCallCount() << '\n';
 
 		// Fibonacci method
 		function.resetCallCount();
 		delete solver;
-		solver = new SolverFibonacci(20);
+		solver = new SolverFibonacci(5);
 		double ansFibonacci = solver->solve(function, data);
 		std::cout << "answer Fibonacci: " << ansFibonacci << '\n';
 		std::cout << "calls  Fibonacci: " << function.getCallCount() << '\n';

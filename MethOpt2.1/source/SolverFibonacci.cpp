@@ -35,9 +35,9 @@ double SolverFibonacci::solve(Function& function, InputData const& data) const {
 		double mu_k		= a_k + ((double)m_fib[m_n - 2] / m_fib[m_n - 1]) * (b_k - a_k);
 		double function_lambda_k = function(lambda_k);
 		double function_mu_k	  = function(mu_k);
-		for (int k = 1; k < m_n - 2; ++k) {
+		for (int k = 1; k < m_n - 2 && b_k - a_k > eps; ++k) {
 			// proceed with left interval [a_k, mu_k]
-			if (function_lambda_k < function_mu_k) {
+			if (function_lambda_k <= function_mu_k) {
 				b_k = mu_k;
 				mu_k = lambda_k;
 				lambda_k = a_k + ((double)m_fib[m_n - 3 - k] / m_fib[m_n - 1 - k]) * (b_k - a_k);
