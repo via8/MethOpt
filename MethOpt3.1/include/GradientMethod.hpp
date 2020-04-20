@@ -1,6 +1,8 @@
 #ifndef GRADIENT_METHOD_H
 #define GRADIENT_METHOD_H
 
+#include "GradientInput.hpp"
+#include "GradientOutput.hpp"
 #include "EigenHelper.hpp"
 #include "Function.h"
 
@@ -14,7 +16,8 @@ public:
 	virtual VectorDouble solve(
 		Function<VectorDouble, double>& f,
 		Function<VectorDouble, VectorDouble>& gradf,
-		VectorDouble initialPoint, double epsilon) = 0;
+		GradientInput const& gradientInput,
+		GradientOutput& gradientOutput) = 0;
 };
 
 #endif /* GRADIENT_METHOD_H */

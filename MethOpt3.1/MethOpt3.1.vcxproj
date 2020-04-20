@@ -141,15 +141,19 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="source\EigenHelper.cpp" />
+    <ClCompile Include="source\GradientInput.cpp" />
     <ClCompile Include="source\GradientMethod.cpp" />
     <ClCompile Include="source\GradientMethod1stOrder.cpp" />
+    <ClCompile Include="source\GradientOutput.cpp" />
     <ClCompile Include="source\main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\EigenHelper.hpp" />
+    <ClInclude Include="include\GradientInput.hpp" />
     <ClInclude Include="include\GradientMethod.hpp" />
     <ClInclude Include="include\GradientMethod1stOrder.hpp" />
     <ClInclude Include="include\GradientMethod2ndOrder.hpp" />
+    <ClInclude Include="include\GradientOutput.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets" />

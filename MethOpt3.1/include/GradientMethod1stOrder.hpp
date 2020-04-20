@@ -13,7 +13,8 @@ public:
 	VectorDouble solve(
 		Function<VectorDouble, double>& f, 
 		Function<VectorDouble, VectorDouble>& gradf, 
-		VectorDouble initialPoint, double epsilon);
+		GradientInput const& gradientInput,
+		GradientOutput& gradientOutput);
 };
 
 #endif /* GRADIENT_METHOD_1ST_ORDER_H */
