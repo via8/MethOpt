@@ -5,20 +5,25 @@
 #include <iostream>
 #include <assert.h>
 
+char const* GradientMethod1stOrder::EXCEPTION_INAPPROPRIATE_PRESICION = "Precision must be in range (0, 1)";
+
 VectorDouble GradientMethod1stOrder::solve(
-	Function<VectorDouble, double>& function, 
-	Function<VectorDouble, VectorDouble>& gradf, 
 	GradientInput const& gradientInput,
-	GradientOutput& gradientOutput) {
+	GradientOutput& gradientOutput,
+	Function<VectorDouble, double>& f, 
+	Function<VectorDouble, VectorDouble>& gradf) {
+
+	f.resetCallCount();
+	gradf.resetCallCount();
 
 	double epsilon = gradientInput.getEpsilon();
 	if (epsilon <= 0.0 || epsilon >= 1)
-		throw GradientMethod::EXCEPTION_INAPPROPRIATE_PRESICION;
+		throw EXCEPTION_INAPPROPRIATE_PRESICION;
 
 	// initialize x0 and one-dimensional minimization function
 	currPoint = gradientInput.getInitialPoint();
 	std::function<double(double)> temp = [&](double alpha) {
-		return function(this->currPoint - alpha * gradf(currPoint));
+		return f(this->currPoint - alpha * gradf(currPoint));
 	};
 	Function<double, double> minf(temp);
 
@@ -42,11 +47,11 @@ VectorDouble GradientMethod1stOrder::solve(
 		inputData = new InputData(a, b, epsilon);
 	}
 	catch (char const* exception) {
-		throw GradientMethod::EXCEPTION_INAPPROPRIATE_PRESICION;
+		throw EXCEPTION_INAPPROPRIATE_PRESICION;
 	}
+	double l2norm = gradf(currPoint).norm();
 
 	// square of l2 norm of gradf(xk) < eps - exit condition
-	double l2norm = gradf(currPoint).norm();
 	while (l2norm * l2norm >= epsilon) {
 		double alpha = solverFibonacci->solve(minf, *inputData);
 		gradientOutput.putPoint(currPoint);

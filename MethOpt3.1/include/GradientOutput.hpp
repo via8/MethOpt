@@ -13,7 +13,8 @@ public:
 	~GradientOutput() {};
 
 	void putPoint(VectorDouble point) { approxSequence.push_back(point); }
-	std::vector<VectorDouble> getApproxSequence() { return approxSequence; }
+	std::vector<VectorDouble> getApproxSequence() const { return approxSequence; }
+	void clearApproxSequence() { approxSequence.clear(); approxSequence.resize(0); }
 };
 
 #endif /* GRADIENT_OUTPUT_HPP */
