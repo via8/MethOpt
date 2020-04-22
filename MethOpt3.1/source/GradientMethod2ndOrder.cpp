@@ -1,6 +1,4 @@
 #include "GradientMethod2ndOrder.hpp"
-#include <iostream>
-#include <math.h>
 
 char const* GradientMethod2ndOrder::EXCEPTION_INAPPROPRIATE_PRESICION = "Precision must be in range (0, 1)";
 

@@ -1,8 +1,12 @@
 #include <iostream>	// cout
 #include <fstream>	// ifstream
 #include <iomanip>	// fixed, setprecision
+#include <stdlib.h>	// abs
 #include <math.h>	// sqrt
 #include <fstream>  // ifstream, ofstream
+#include <assert.h>	// assert
+#include <limits>	// numerical_limits
+#include <cmath>	// isfinite
 #include "GradientInput.hpp"
 #include "GradientOutput.hpp"
 #include "EigenHelper.hpp"
@@ -40,7 +44,77 @@ MatrixDouble hessianf(VectorDouble x) {
 	return res;
 }
 
+// define computational experiment procedure here
+bool isApplicable(VectorDouble centerPoint, double delta, double& m, double& M) {
+	int const meshParam = 10;
+	double const step = delta / meshParam;
+	VectorDouble startPoint(centerPoint.rows());
+	VectorDouble x(centerPoint.rows());
+	VectorDouble y(centerPoint.rows());
+	double mCurr = std::numeric_limits<double>::infinity();
+	double MCurr = 0;
+
+	startPoint[0] = centerPoint[0] - delta / 2;
+	startPoint[1] = centerPoint[1] - delta / 2;
+
+	// outer loop for X point
+	for (int i = 0; i < meshParam; ++i) {
+		for (int j = 0; j < meshParam; ++j) {
+			x[0] = startPoint[0] + step * i;
+			x[1] = startPoint[1] + step * j;
+
+			// inner loop for Y point
+			for (int ii = 0; ii < meshParam; ++ii) {
+				for (int jj = 0; jj < meshParam; ++jj) {
+					if (ii == i && jj == j) continue;
+					y[0] = startPoint[0] + step * ii;
+					y[1] = startPoint[1] + step * jj;
+
+					// here we have check of the next inaquality:
+					// m||y||^2 <= yT*H(x)*y <= M||y||^2 using l2 norm
+					MatrixDouble hessian = hessianf(x);
+					double center = y.transpose() * hessian * y;	// yT*H(x)*y
+					double sqNorm = y.norm() * y.norm();			// ||y||^2
+					double temp = center / sqNorm;					// yT*H(x)*y / ||y||^2
+					if (mCurr > temp)
+						mCurr = temp;
+					if (MCurr < temp)
+						MCurr = temp;
+				}
+			}
+		}
+	}
+
+	if (isfinite(mCurr) && MCurr > 0 && mCurr < MCurr) {
+		m = mCurr;
+		M = MCurr;
+		return true;
+	}
+
+	return false;
+}
+
 /* END OF INITIAL DATA */
+
+double checkOrthty(GradientOutput const& gradientOutput) {
+	double max = 0.0;
+	if (gradientOutput.getApproxSequence().size() <= 1)
+		return max;
+	VectorDouble curr = gradientOutput.getApproxSequence()[0] - gradientOutput.getApproxSequence()[1];
+	VectorDouble next;
+	for (int i = 1, size = gradientOutput.getApproxSequence().size(); i < size - 1; ++i, curr = next) {
+		next = gradientOutput.getApproxSequence()[i] - gradientOutput.getApproxSequence()[i + 1];
+		curr = curr / curr.norm();
+		next = next / next.norm();
+		double scalarProduct = curr.transpose() * next;
+		if (max < abs(scalarProduct))
+			max = abs(scalarProduct);
+		//std::cout << "scalar products:\n";
+		//std::cout << scalarProduct << '\n';
+	}
+
+	return max;
+}
 
 void plot(GradientOutput const& gradientOutput) {
 	std::ofstream output;
@@ -95,18 +169,40 @@ int main(int argc, char const* argv[]) {
 		// 1st-order method call
 		GradientMethod1stOrder method1st;
 		VectorDouble ans1st = method1st.solve(gradientInput, gradientOutput, function, gradfunction);
-		std::cout << "answer 1st-order method: " << ans1st.transpose() << '\n';
-		std::cout << "calls  1st-order method: " << function.getCallCount() << '\n';
+		std::cout << "1ST-ORDER GRADIENT METHOD\n";
+		std::cout << "answer: " << ans1st.transpose() << '\n';
+		std::cout << "calls : " << function.getCallCount() << '\n';
+		std::cout << "maximum scalar product: " << checkOrthty(gradientOutput) << '\n' << '\n';
 		if (gradientInput.getDim() == 2) {
 			plot(gradientOutput);
 		}
 		gradientOutput.clearApproxSequence();
 
+		// define computational experiment here
+		// that determines whether 2-nd order method is applicable
+		{
+			VectorDouble center(gradientInput.getDim());
+			center[0] = -2.0 / (3.0 * sqrt(13.0));
+			center[1] = -1.0 / (3.0 * sqrt(13.0));
+			double m = 0.0;
+			double M = 0.0;
+			assert(isApplicable(center, 1.0, m, M));
+			assert(m > 0);
+			assert(M > 0);
+			assert(m < M);
+			std::cout << "COMPUTATIONAL EXPERIMENT\n";
+			std::cout << "m = " << m << '\n';
+			std::cout << "M = " << M << '\n';
+			std::cout << "convergence rate (the denominator of geometric progression): q = " << (M - m) / (M + m) << '\n' << '\n';
+		}
+
 		// 2nd-order method call
 		GradientMethod2ndOrder method2nd;
 		VectorDouble ans2nd = method2nd.solve(gradientInput, gradientOutput, function, gradfunction, hessianfunction);
-		std::cout << "answer 2nd-order method: " << ans2nd.transpose() << '\n';
-		std::cout << "calls  2nd-order method: " << function.getCallCount() << '\n';
+		std::cout << "2ND-ORDER GRADIENT METHOD\n";
+		std::cout << "answer: " << ans2nd.transpose() << '\n';
+		std::cout << "calls : " << function.getCallCount() << '\n';
+		std::cout << "maximum scalar product: " << checkOrthty(gradientOutput) << '\n' << '\n';
 		if (gradientInput.getDim() == 2) {
 			plot(gradientOutput);
 		}

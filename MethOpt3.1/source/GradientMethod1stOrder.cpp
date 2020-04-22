@@ -2,8 +2,6 @@
 #include "Function.cpp"
 #include "SolverFibonacci.cpp"
 #include "InputData.cpp"
-#include <iostream>
-#include <assert.h>
 
 char const* GradientMethod1stOrder::EXCEPTION_INAPPROPRIATE_PRESICION = "Precision must be in range (0, 1)";
 
@@ -29,9 +27,10 @@ VectorDouble GradientMethod1stOrder::solve(
 
 	// initialize one-dimensional Fibonacci method
 	// best approach using it - when Fn > (b - a) / eps
-	double a = epsilon;
+	double minfEps = epsilon / 1000;
+	double a = minfEps;
 	double b = 1.0;
-	double minFibonacciNumber = (b - a) / epsilon;
+	double minFibonacciNumber = (b - a) / minfEps;
 	int n = 2;
 	for (int prev = 1, curr = 1; (double)curr <= minFibonacciNumber; ++n) {
 		int temp = curr;
@@ -43,8 +42,8 @@ VectorDouble GradientMethod1stOrder::solve(
 	Solver* solverFibonacci = nullptr;
 	InputData* inputData	= nullptr;
 	try {
-		solverFibonacci = new SolverFibonacci(n + 1);
-		inputData = new InputData(a, b, epsilon);
+		solverFibonacci = new SolverFibonacci(n);
+		inputData = new InputData(a, b, minfEps);
 	}
 	catch (char const* exception) {
 		throw EXCEPTION_INAPPROPRIATE_PRESICION;
