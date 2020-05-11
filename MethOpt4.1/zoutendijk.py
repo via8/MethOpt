@@ -5,16 +5,22 @@ from scipy.optimize import linprog
 
 
 def test(linear_solution, lin_prob, len_eq, m, epsilon):
+    n = lin_prob.n
+    bounds = [[0.0] * 2] * n
+    for i in range(0, n):
+        bounds[i][0] = -50.0
+        bounds[i][1] = 50.0
     temp = linprog(lin_prob.c,
                    A_ub=lin_prob.A[len_eq:m],
                    b_ub=lin_prob.b[len_eq:m],
                    A_eq=lin_prob.A[0:len_eq],
                    b_eq=lin_prob.b[0:len_eq],
-                   bounds=[[-10.0, 10.0], [-10.0, 10.0], [-10.0, 10.0]],
+                   bounds=bounds,
                    method='simplex').__getattr__('x')
     assert (len(linear_solution) == len(temp))
     for i in range(0, len(linear_solution)):
         assert(abs(linear_solution[i] - temp[i]) < epsilon)
+    return temp
 
 
 def set_alpha_k(_alpha0, _lambda, phi0, phi_list: [], x_k, s_k, eta_k):
@@ -31,14 +37,13 @@ def set_alpha_k(_alpha0, _lambda, phi0, phi_list: [], x_k, s_k, eta_k):
         if not fits:
             alpha_k = alpha_k * _lambda
             temp = x_k + alpha_k * s_k
-
     return alpha_k
 
 
 def run(x0: [], phi0, phi0_der, phi_list: [], phi_der_list: [], A: [[]], b: [], epsilon: float):
     _lambda = 0.8  # decrease ratio
     _alpha0 = 0.5  # default step
-    _delta0 = 0.1
+    _delta0 = 0.01
 
     n = len(A[0])
     x_k = x0
