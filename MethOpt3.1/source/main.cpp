@@ -166,6 +166,7 @@ int main(int argc, char const* argv[]) {
 		GradientOutput gradientOutput;
 		input.close();
 
+
 		// 1st-order method call
 		GradientMethod1stOrder method1st;
 		VectorDouble ans1st = method1st.solve(gradientInput, gradientOutput, function, gradfunction);

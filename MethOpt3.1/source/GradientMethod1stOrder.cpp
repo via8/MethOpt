@@ -2,6 +2,7 @@
 #include "Function.cpp"
 #include "SolverFibonacci.cpp"
 #include "InputData.cpp"
+#include <iostream>
 
 char const* GradientMethod1stOrder::EXCEPTION_INAPPROPRIATE_PRESICION = "Precision must be in range (0, 1)";
 
@@ -51,14 +52,17 @@ VectorDouble GradientMethod1stOrder::solve(
 	double l2norm = gradf(currPoint).norm();
 
 	// square of l2 norm of gradf(xk) < eps - exit condition
+	std::cout << "ALPHA PARAMETER VALUES\n";
+	int i = 0;
 	while (l2norm * l2norm >= epsilon) {
 		double alpha = solverFibonacci->solve(minf, *inputData);
 		gradientOutput.putPoint(currPoint);
 		currPoint = currPoint - alpha * gradf(currPoint);
 		l2norm = gradf(currPoint).norm();
-		// TODO: check (*prev, *curr) ~ 0
+		std::cout << "step " << ++i << " alpha: " << alpha << '\n';
 	}
 	gradientOutput.putPoint(currPoint);
+	std::cout << '\n';
 
 	delete solverFibonacci;
 	delete inputData;
