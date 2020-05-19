@@ -1,1 +1,1 @@
-Student work on 'Methods of optimization' course
+# Student work on 'Methods of optimization' course
