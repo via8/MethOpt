@@ -4,7 +4,7 @@ from matplotlib import pyplot
 import os
 
 WORK_DIR = os.path.dirname(os.path.abspath(__file__))
-OUT_DIR = WORK_DIR + '\\latex\\res\\out\\'
+OUT_DIR = WORK_DIR + '\\doc\\res\\out\\'
 CORRIDOR_WIDTH = 1.0
 A_PARAM = 0.0
 A_ARRAY = [CORRIDOR_WIDTH * 0.333, CORRIDOR_WIDTH * 0.400,
