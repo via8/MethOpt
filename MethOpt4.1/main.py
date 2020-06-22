@@ -21,7 +21,7 @@ def main():
     def phi3(x, y, z): return -y - x * z
     def phi4(x, y, z): return -x
     def phi5(x, y, z): return -y
-    def phi6(x, y, z): return -z
+    def phi6(x, y, z): return -z + 0.5
     phi_list.append(phi1)
     phi_list.append(phi2)
     phi_list.append(phi3)
@@ -86,7 +86,7 @@ def main():
     x0_b = b
 
     # precision
-    epsilon = 1e-3
+    epsilon = 1e-6
 
     # TODO: implement general search of x0
     # x0 for x0 search, yes
@@ -99,16 +99,25 @@ def main():
     x0 = concatenate((x0, [curr]), axis=None)
 
     # find initial approximation by solving auxiliary problem
-    x0 = zoutendijk.run(x0, x0_phi0, x0_phi0_der, x0_phi_list, x0_phi_der_list, x0_A, x0_b, epsilon)
+    x0 = zoutendijk.run(x0, x0_phi0, x0_phi0_der, x0_phi_list, x0_phi_der_list, x0_A, x0_b, epsilon, trace=False)
     x0 = x0[:-1]
+    print('initial approximation:')
+    print(str(x0) + '\n')
 
     # find solution
-    ans = zoutendijk.run(x0, phi0, phi0_der, phi_list, phi_der_list, A, b, epsilon)
+    ans = zoutendijk.run(x0, phi0, phi0_der, phi_list, phi_der_list, A, b, epsilon, trace=True)
     print('zoutendijk solution:')
-    print(ans)
-    print('\n')
+    print(str(ans) + '\n')
+    print('objective function value:')
     print(str(phi0(*ans)))
-
+    print('objective function der value:')
+    print(str(phi0_der(*ans)))
+    print('phis:')
+    for phi_i in phi_list:
+        print(str(phi_i(*ans)))
+    print('phi_ders:')
+    for phi_der_i in phi_der_list:
+        print(str(phi_der_i(*ans)))
 
 if __name__ == '__main__':
     main()

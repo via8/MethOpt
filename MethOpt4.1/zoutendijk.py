@@ -40,17 +40,29 @@ def set_alpha_k(_alpha0, _lambda, phi0, phi_list: [], x_k, s_k, eta_k):
     return alpha_k
 
 
-def run(x0: [], phi0, phi0_der, phi_list: [], phi_der_list: [], A: [[]], b: [], epsilon: float):
+def run(x0: [], phi0, phi0_der, phi_list: [], phi_der_list: [], A: [[]], b: [], epsilon: float, trace: bool):
     _lambda = 0.8  # decrease ratio
-    _alpha0 = 0.5  # default step
-    _delta0 = 0.01
+    _alpha0 = 1.0  # default step
+    _delta0 = epsilon
 
     n = len(A[0])
     x_k = x0
     eta_k = 1.0
     delta_k = _delta0
+    k_step = 0
 
-    while abs(eta_k) > epsilon:
+    I_l = []
+    for i in range(0, len(phi_list)):
+        if abs(phi_list[i](*x_k)) >= epsilon:
+            I_l.append(i)
+
+    phi_max = -float('inf')
+    for i in I_l:
+        temp = phi_list[i](*x_k)
+        if phi_max < temp:
+            phi_max = temp
+
+    while abs(eta_k) > epsilon or delta_k >= -phi_max:
         # STEP 1: solving auxiliary problem
         # calculate size of I_delta_k = {i | -delta_k <= phi_i(xk) <= 0}
         I_delta_k = []
@@ -120,7 +132,26 @@ def run(x0: [], phi0, phi0_der, phi_list: [], phi_der_list: [], A: [[]], b: [], 
 
         if eta_k < -delta_k:
             x_k = x_k + alpha_k * s_k
+            I_l = []
+            for i in range(0, len(phi_list)):
+                if abs(phi_list[i](*x_k)) >= epsilon:
+                    I_l.append(i)
+
+            phi_max = -float('inf')
+            for i in I_l:
+                temp = phi_list[i](*x_k)
+                if phi_max < temp:
+                    phi_max = temp
         else:
             delta_k = _lambda * delta_k
+
+        k_step += 1
+        if trace:
+            print("k = " + str(k_step))
+            print("delta_k = " + str(delta_k))
+            # print("eta_k = " + str(eta_k))
+            print("x_k = (%.6f, %.6f, %.6f)" % (x_k[0], x_k[1], x_k[2]))
+            print("objective function = %.6f\n" % phi0(*x_k))
+            # print("x_k = " + str(x_k) + '\n')
 
     return x_k

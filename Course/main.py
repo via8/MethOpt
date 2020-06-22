@@ -165,3 +165,4 @@ if __name__ == '__main__':
         if not os.path.exists(OUT_DIR):
             os.makedirs(OUT_DIR)
         pyplot.savefig(OUT_DIR + w_coefficient_str + 'w' + '.png')
+        pyplot.show()
